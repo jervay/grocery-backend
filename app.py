@@ -1,9 +1,23 @@
-from flask import Flask, request, jsonify
-import requests
-from bs4 import BeautifulSoup
-import re
+import os
+from flask import Flask, jsonify
+from flask_caching import Cache
 
 app = Flask(__name__)
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+
+# Add this health check endpoint
+@app.route('/')
+def health_check():
+    return "App is running!", 200
+
+@app.route('/search')
+def search():
+    # Your existing search logic here
+    return jsonify({"status": "working"})
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
 
 # Store URLs and selectors for each supermarket
 STORES = {

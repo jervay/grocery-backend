@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NZ Grocery Price Compare</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        #search-box {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .product {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>NZ Grocery Price Compare</h1>
+    <p>Find the cheapest groceries near you!</p>
+    
+    <div>
+        <input type="text" id="suburb" placeholder="Enter your suburb" required>
+        <input type="text" id="search-box" placeholder="Search for a grocery item...">
+        <button onclick="searchProducts()">Search</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        async function searchProducts() {
+            const item = document.getElementById('search-box').value;
+            const suburb = document.getElementById('suburb').value;
+            
+            if (!item || !suburb) {
+                alert("Please enter both a suburb and grocery item");
+                return;
+            }
+
+            document.getElementById('results').innerHTML = "<p>Searching... Please wait</p>";
+            
+            try {
+                // This will connect to our backend (we'll set this up next)
+                const response = await fetch(`https://grocerycompare-a08bb91760ee.herokuapp.com/search?item=${encodeURIComponent(item)}&suburb=${encodeURIComponent(suburb)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('results').innerHTML = `<p>Error: ${data.error}</p>`;
+                } else if (data.results.length === 0) {
+                    document.getElementById('results').innerHTML = "<p>No results found. Try a different search term.</p>";
+                } else {
+                    let html = '<h2>Cheapest Prices:</h2>';
+                    data.results.forEach(product => {
+                        html += `
+                            <div class="product">
+                                <h3>${product.name}</h3>
+                                <p>Price: $${product.price} at ${product.store}</p>
+                                <p>Location: ${product.location}</p>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('results').innerHTML = html;
+                }
+            } catch (error) {
+                document.getElementById('results').innerHTML = "<p>Sorry, something went wrong. Please try again later.</p>";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
